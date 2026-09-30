@@ -55,4 +55,4 @@ From a terminal, `Portly.app/Contents/MacOS/Portly --list` prints what Portly se
 
 MIT
 
-The icon is designed in Figma and exported as `icon/AppIcon.png` (1024 × 1024, transparent corners). Run `./icon/make-icns.sh` after replacing it. The menu bar icon is `icon/MenuIcon.png`, `@2x` and `@3x` (the "Subtract" layer of that frame, exported 16, 32 and 48 px high).
+The icon is designed in Figma and exported as `icon/AppIcon.png` (1024 × 1024, transparent corners). Run `./icon/make-icns.sh` after replacing it. The menu bar icon is `icon/MenuIcon.png`, `@2x` and `@3x` (exported from the "Menu bar icon" frame in Figma: 16, 32 and 48 px high).
