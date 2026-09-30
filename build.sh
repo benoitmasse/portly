@@ -30,7 +30,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-# The icon is drawn by icon/make-icon.swift (run it again after changing the design).
+# The icon comes from icon/AppIcon.png (run icon/make-icns.sh after replacing it).
 cp icon/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 # Universal binary: Apple Silicon and Intel. Liquid Glass needs macOS 26.

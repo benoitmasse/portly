@@ -1,4 +1,4 @@
-<p align="center"><img src="icon/AppIcon.png" width="160" alt="Portly icon: a server rack with happy faces"></p>
+<p align="center"><img src="icon/AppIcon.png" width="160" alt="Portly icon: a server with a monocle and a mustache"></p>
 
 # Portly
 
@@ -55,4 +55,4 @@ From a terminal, `Portly.app/Contents/MacOS/Portly --list` prints what Portly se
 
 MIT
 
-The icon is drawn in code by [`icon/make-icon.swift`](icon/make-icon.swift). Run `swift icon/make-icon.swift` to redraw it.
+The icon is designed in Figma and exported as `icon/AppIcon.png` (1024 × 1024, transparent corners). Run `./icon/make-icns.sh` after replacing it.
