@@ -24,10 +24,14 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$VERSION</string>
   <key>LSMinimumSystemVersion</key><string>26.0</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSUIElement</key><true/>
 </dict>
 </plist>
 PLIST
+
+# The icon is drawn by icon/make-icon.swift (run it again after changing the design).
+cp icon/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 # Universal binary: Apple Silicon and Intel. Liquid Glass needs macOS 26.
 BUILD=$(mktemp -d)

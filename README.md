@@ -1,3 +1,5 @@
+<p align="center"><img src="icon/AppIcon.png" width="160" alt="Portly icon: a server rack with happy faces"></p>
+
 # Portly
 
 A small macOS menu bar app that shows the local servers running on your Mac, and lets you stop or restart them.
@@ -52,3 +54,5 @@ From a terminal, `Portly.app/Contents/MacOS/Portly --list` prints what Portly se
 ## License
 
 MIT
+
+The icon is drawn in code by [`icon/make-icon.swift`](icon/make-icon.swift). Run `swift icon/make-icon.swift` to redraw it.

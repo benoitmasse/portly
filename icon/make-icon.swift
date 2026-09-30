@@ -1,0 +1,143 @@
+// Draws the Portly app icon and writes icon/AppIcon.png (1024 px) and icon/AppIcon.icns.
+// Run from the repo root:  swift icon/make-icon.swift
+import SwiftUI
+import AppKit
+
+let ink = Color(red: 0.086, green: 0.086, blue: 0.094)
+
+/// The server rack: three rows, rounded on the outside, with small gaps between them.
+struct Rack: View {
+    let width: CGFloat = 600
+    let rowHeight: CGFloat = 184
+    let gap: CGFloat = 14
+    let outer: CGFloat = 64
+    let inner: CGFloat = 14
+
+    func row(top: CGFloat, bottom: CGFloat) -> some View {
+        UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                               bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
+            .fill(LinearGradient(colors: [.white, Color(white: 0.9)], startPoint: .top, endPoint: .bottom))
+            .overlay(
+                // Thin light edge along the top of each row.
+                UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                                       bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
+                    .strokeBorder(LinearGradient(colors: [.white, .white.opacity(0)], startPoint: .top, endPoint: .center),
+                                  lineWidth: 3)
+            )
+            .frame(width: width, height: rowHeight)
+    }
+
+    var body: some View {
+        VStack(spacing: gap) {
+            row(top: outer, bottom: inner).overlay(HappyFace())
+            row(top: inner, bottom: inner).overlay(WinkFace())
+            row(top: inner, bottom: outer).overlay(Led().offset(x: 232, y: 22))
+        }
+        .compositingGroup()  // one shadow for the whole rack, not one per eye
+        .shadow(color: .black.opacity(0.45), radius: 22, y: 14)
+    }
+}
+
+struct Eye: View {
+    var body: some View {
+        Circle().fill(ink).frame(width: 66, height: 66)
+            .overlay(Circle().fill(.white.opacity(0.9)).frame(width: 18, height: 18).offset(x: -12, y: -13))
+    }
+}
+
+struct Smile: View {
+    var body: some View {
+        Path { p in
+            p.move(to: CGPoint(x: 0, y: 0))
+            p.addQuadCurve(to: CGPoint(x: 64, y: 0), control: CGPoint(x: 32, y: 44))
+        }
+        .stroke(ink, style: StrokeStyle(lineWidth: 14, lineCap: .round))
+        .frame(width: 64, height: 26)
+    }
+}
+
+struct HappyFace: View {
+    var body: some View {
+        ZStack {
+            Eye().offset(x: -150, y: -6)
+            Eye().offset(x: 150, y: -6)
+            Smile().offset(y: 18)
+        }
+    }
+}
+
+struct WinkFace: View {
+    var body: some View {
+        ZStack {
+            Eye().offset(x: -150, y: -14)
+            Capsule().fill(ink).frame(width: 80, height: 14).offset(x: 150, y: -14)
+            Smile().offset(y: 40)
+        }
+    }
+}
+
+struct Led: View {
+    var body: some View {
+        Circle()
+            .fill(RadialGradient(colors: [Color(red: 0.55, green: 0.95, blue: 0.68), Color(red: 0.14, green: 0.65, blue: 0.35)],
+                                 center: UnitPoint(x: 0.35, y: 0.3), startRadius: 2, endRadius: 30))
+            .frame(width: 46, height: 46)
+            .shadow(color: Color(red: 0.2, green: 0.85, blue: 0.45).opacity(0.7), radius: 12)
+    }
+}
+
+/// macOS 26 icon grid: an 824 pt continuous rounded square centred on a 1024 canvas.
+struct AppIcon: View {
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 185, style: .continuous)
+        ZStack {
+            shape
+                .fill(LinearGradient(colors: [Color(white: 0.25), Color(white: 0.07)], startPoint: .top, endPoint: .bottom))
+                .overlay(
+                    // Soft light from the top, like the system icons.
+                    shape.fill(RadialGradient(colors: [.white.opacity(0.14), .clear],
+                                              center: UnitPoint(x: 0.5, y: 0), startRadius: 0, endRadius: 520))
+                )
+                .overlay(
+                    // Glass edge: bright at the top, fading toward the bottom.
+                    shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.05), .white.opacity(0.18)],
+                                                      startPoint: .top, endPoint: .bottom), lineWidth: 4)
+                )
+                .frame(width: 824, height: 824)
+                .shadow(color: .black.opacity(0.35), radius: 20, y: 12)
+            Rack().offset(y: 4)
+        }
+        .frame(width: 1024, height: 1024)
+    }
+}
+
+@MainActor func render() throws {
+    let dir = URL(fileURLWithPath: "icon")
+    let renderer = ImageRenderer(content: AppIcon())
+    renderer.scale = 1
+    guard let cg = renderer.cgImage else { fatalError("render failed") }
+    let png = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:])!
+    try png.write(to: dir.appendingPathComponent("AppIcon.png"))
+}
+
+try MainActor.assumeIsolated { try render() }
+
+// Build the .icns from the 1024 px master.
+let iconset = "icon/AppIcon.iconset"
+try? FileManager.default.removeItem(atPath: iconset)
+try FileManager.default.createDirectory(atPath: iconset, withIntermediateDirectories: true)
+func run(_ path: String, _ args: [String]) {
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: path)
+    p.arguments = args
+    p.standardOutput = FileHandle.nullDevice
+    try! p.run()
+    p.waitUntilExit()
+}
+for size in [16, 32, 128, 256, 512] {
+    run("/usr/bin/sips", ["-z", "\(size)", "\(size)", "icon/AppIcon.png", "--out", "\(iconset)/icon_\(size)x\(size).png"])
+    run("/usr/bin/sips", ["-z", "\(size * 2)", "\(size * 2)", "icon/AppIcon.png", "--out", "\(iconset)/icon_\(size)x\(size)@2x.png"])
+}
+run("/usr/bin/iconutil", ["-c", "icns", iconset, "-o", "icon/AppIcon.icns"])
+try? FileManager.default.removeItem(atPath: iconset)
+print("Wrote icon/AppIcon.png and icon/AppIcon.icns")
