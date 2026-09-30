@@ -29,7 +29,7 @@ Portly needs **macOS 26 (Tahoe)** or later.
    xattr -dr com.apple.quarantine /Applications/Portly.app
    ```
 
-Portly appears as a server-rack icon in the menu bar. The number next to it is the number of websites that are running.
+Portly appears as a small server with a monocle and a mustache in the menu bar. The number next to it is the number of websites that are running.
 
 ## Build it yourself
 
@@ -55,4 +55,4 @@ From a terminal, `Portly.app/Contents/MacOS/Portly --list` prints what Portly se
 
 MIT
 
-The icon is designed in Figma and exported as `icon/AppIcon.png` (1024 × 1024, transparent corners). Run `./icon/make-icns.sh` after replacing it.
+The icon is designed in Figma and exported as `icon/AppIcon.png` (1024 × 1024, transparent corners). Run `./icon/make-icns.sh` after replacing it. The menu bar icon is `icon/MenuIcon.png`, `@2x` and `@3x` (the "Subtract" layer of that frame, exported 16, 32 and 48 px high).

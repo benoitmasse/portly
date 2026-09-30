@@ -1149,9 +1149,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateStatusItem() {
         guard let button = statusItem?.button else { return }
-        let symbol = store.orphans.isEmpty ? "server.rack" : "exclamationmark.triangle"
-        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Servers")
+        // The gentleman server (icon/MenuIcon*.png, exported from Figma). A warning sign when something needs cleaning up.
+        let image = store.orphans.isEmpty
+            ? (NSImage(named: "MenuIcon") ?? NSImage(systemSymbolName: "server.rack", accessibilityDescription: nil))
+            : NSImage(systemSymbolName: "exclamationmark.triangle", accessibilityDescription: nil)
         image?.isTemplate = true
+        image?.accessibilityDescription = "Portly"
         button.image = image
         button.title = store.websites.isEmpty ? "" : " \(store.websites.count)"
     }

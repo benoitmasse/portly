@@ -32,6 +32,8 @@ PLIST
 
 # The icon comes from icon/AppIcon.png (run icon/make-icns.sh after replacing it).
 cp icon/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+# Menu bar icon (template image: only its shape is used, macOS picks the color).
+cp icon/MenuIcon.png icon/MenuIcon@2x.png icon/MenuIcon@3x.png "$APP/Contents/Resources/"
 
 # Universal binary: Apple Silicon and Intel. Liquid Glass needs macOS 26.
 BUILD=$(mktemp -d)
