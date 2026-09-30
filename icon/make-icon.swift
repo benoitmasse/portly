@@ -4,6 +4,11 @@ import SwiftUI
 import AppKit
 
 let ink = Color(red: 0.086, green: 0.086, blue: 0.094)
+let rowGray = Color(white: 0.9)
+let mint = Color(red: 0.881, green: 1, blue: 0.92)
+
+// Values below come from the "Portly icon" frame in Figma (file BENDEN, page Portly).
+// Gradient start/end points are converted from Figma's gradient matrices.
 
 /// The server rack: three rows, rounded on the outside, with small gaps between them.
 struct Rack: View {
@@ -13,25 +18,29 @@ struct Rack: View {
     let outer: CGFloat = 64
     let inner: CGFloat = 14
 
-    func row(top: CGFloat, bottom: CGFloat) -> some View {
-        UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
-                               bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
-            .fill(LinearGradient(colors: [.white, Color(white: 0.9)], startPoint: .top, endPoint: .bottom))
-            .overlay(
-                // Thin light edge along the top of each row.
-                UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
-                                       bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
-                    .strokeBorder(LinearGradient(colors: [.white, .white.opacity(0)], startPoint: .top, endPoint: .center),
-                                  lineWidth: 3)
-            )
+    func row(top: CGFloat, bottom: CGFloat, fill: LinearGradient) -> some View {
+        let shape = UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                                           bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
+        return shape
+            .fill(fill)
+            .overlay(shape.strokeBorder(.white, lineWidth: 3))
             .frame(width: width, height: rowHeight)
     }
 
     var body: some View {
         VStack(spacing: gap) {
-            row(top: outer, bottom: inner).overlay(HappyFace())
-            row(top: inner, bottom: inner).overlay(WinkFace())
-            row(top: inner, bottom: outer).overlay(Led().offset(x: 232, y: 22))
+            row(top: outer, bottom: inner,
+                fill: LinearGradient(stops: [.init(color: .white, location: 0.317), .init(color: rowGray, location: 1)],
+                                     startPoint: UnitPoint(x: 0.4874, y: 0.0034), endPoint: UnitPoint(x: 0.5283, y: 1.6158)))
+                .overlay(HappyFace())
+            row(top: inner, bottom: inner,
+                fill: LinearGradient(stops: [.init(color: rowGray, location: 0), .init(color: .white, location: 0.683)],
+                                     startPoint: UnitPoint(x: 0.5099, y: 1.2753), endPoint: UnitPoint(x: 0.4899, y: -0.2894)))
+                .overlay(WinkFace())
+            row(top: inner, bottom: outer,
+                fill: LinearGradient(stops: [.init(color: rowGray, location: 0), .init(color: mint, location: 1)],
+                                     startPoint: UnitPoint(x: 0.4235, y: 0.233), endPoint: UnitPoint(x: 0.7583, y: 1.4016)))
+                .overlay(Led().offset(x: 232, y: 22))
         }
         .compositingGroup()  // one shadow for the whole rack, not one per eye
         .shadow(color: .black.opacity(0.45), radius: 22, y: 14)
@@ -39,9 +48,11 @@ struct Rack: View {
 }
 
 struct Eye: View {
+    /// Where the small shine sits, from the centre of the eye.
+    var shine = CGSize(width: -12.5, height: -15.5)
     var body: some View {
         Circle().fill(ink).frame(width: 66, height: 66)
-            .overlay(Circle().fill(.white.opacity(0.9)).frame(width: 18, height: 18).offset(x: -12, y: -13))
+            .overlay(Circle().fill(.white.opacity(0.9)).frame(width: 9, height: 9).offset(shine))
     }
 }
 
@@ -69,7 +80,7 @@ struct HappyFace: View {
 struct WinkFace: View {
     var body: some View {
         ZStack {
-            Eye().offset(x: -150, y: -14)
+            Eye(shine: CGSize(width: -13.5, height: -11.5)).offset(x: -150, y: -14)
             Capsule().fill(ink).frame(width: 80, height: 14).offset(x: 150, y: -14)
             Smile().offset(y: 40)
         }
@@ -79,8 +90,9 @@ struct WinkFace: View {
 struct Led: View {
     var body: some View {
         Circle()
-            .fill(RadialGradient(colors: [Color(red: 0.55, green: 0.95, blue: 0.68), Color(red: 0.14, green: 0.65, blue: 0.35)],
-                                 center: UnitPoint(x: 0.35, y: 0.3), startRadius: 2, endRadius: 30))
+            .fill(RadialGradient(stops: [.init(color: Color(red: 0.19, green: 0.947, blue: 0.436), location: 0.644),
+                                         .init(color: Color(red: 0.14, green: 0.65, blue: 0.35), location: 1)],
+                                 center: .center, startRadius: 0, endRadius: 27.6))
             .frame(width: 46, height: 46)
             .shadow(color: Color(red: 0.2, green: 0.85, blue: 0.45).opacity(0.7), radius: 12)
     }
@@ -92,19 +104,15 @@ struct AppIcon: View {
         let shape = RoundedRectangle(cornerRadius: 185, style: .continuous)
         ZStack {
             shape
-                .fill(LinearGradient(colors: [Color(white: 0.25), Color(white: 0.07)], startPoint: .top, endPoint: .bottom))
+                // Lighter toward the lower right, darker at the edges.
+                .fill(RadialGradient(colors: [Color(white: 0.25), Color(white: 0.07)],
+                                     center: UnitPoint(x: 0.7906, y: 0.7778), startRadius: 0, endRadius: 490.8))
                 .overlay(
                     // Soft light from the top, like the system icons.
                     shape.fill(RadialGradient(colors: [.white.opacity(0.14), .clear],
                                               center: UnitPoint(x: 0.5, y: 0), startRadius: 0, endRadius: 520))
                 )
-                .overlay(
-                    // Glass edge: bright at the top, fading toward the bottom.
-                    shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.05), .white.opacity(0.18)],
-                                                      startPoint: .top, endPoint: .bottom), lineWidth: 4)
-                )
                 .frame(width: 824, height: 824)
-                .shadow(color: .black.opacity(0.35), radius: 20, y: 12)
             Rack().offset(y: 4)
         }
         .frame(width: 1024, height: 1024)
